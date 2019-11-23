@@ -13,9 +13,12 @@ const matching = new Map();
 
 io.on("connection", (socket) => {
   socket.on("disconnect", () => {
-    const opponent = matching.get(socket);
-    matching.delete(socket);
-    matching.delete(opponent);
+    if (matching.get(socket)) {
+      const opponent = matching.get(socket);
+      matching.delete(socket);
+      matching.delete(opponent);
+      opponent.emit("opponent-disconnect");
+    }
   });
   socket.on("wait", ({ board }) => {
     if (!waiting) {

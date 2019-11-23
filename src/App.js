@@ -17,7 +17,11 @@ function App() {
     socket = io();
     socket.on("match", startPlaying);
     socket.on("move", moveGhost);
-    socket.on("hoge", (a) => console.log(a));
+    socket.on("opponent-disconnect", () => {
+      alert("あいてがぬけました");
+      setState("home");
+    });
+    // socket.on("hoge", (a) => console.log(a));
   }, []);
 
   const startSetting = () => {
