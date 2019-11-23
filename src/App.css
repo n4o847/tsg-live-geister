@@ -20,3 +20,46 @@
 .App-link {
   color: #09d3ac;
 }
+
+.board {
+}
+
+.row {
+  display: flex;
+}
+
+
+.cell {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 15vmin;
+  height: 15vmin;
+  border: solid 1px #FFF;
+}
+
+.selected {
+  background-color: #09d3ac;
+}
+
+.geister {
+  width: 10vmin;
+  height: 10vmin;
+  border-radius: 50%;
+}
+
+.geister-0 {
+
+}
+
+.geister-1 {
+  background-color: blue;
+}
+
+.geister-2 {
+  background-color: red;
+}
+
+.geister-3 {
+  background-color: white;
+}
