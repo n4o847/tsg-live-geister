@@ -10,10 +10,13 @@ function App() {
   const [myBoard, setMyBoard] = useState(() => range(6).map((i) => range(6).map((j) => 0)));
   const [opBoard, setOpBoard] = useState(() => range(6).map((i) => range(6).map((j) => 0)));
   const [selected, setSelected] = useState([]);
+  const [myTurn, setMyTurn] = useState(false);
 
   useEffect(() => {
     socket = io();
     socket.on("match", startPlaying);
+    socket.on("move", moveGhost);
+    socket.on("hoge", (a) => console.log(a));
   }, []);
 
   const startSetting = () => {
@@ -35,9 +38,10 @@ function App() {
     socket.emit("wait", { board: myBoard });
   };
 
-  const startPlaying = ({ board }) => {
+  const startPlaying = ({ turn, board }) => {
     setState("playing");
     setOpBoard(board);
+    setMyTurn(turn);
   };
 
   const ViewHome = () => {
@@ -68,11 +72,69 @@ function App() {
         }
       }
     }
+    if (state === "playing" && myTurn) {
+      if (!selected.length) {
+        if (myBoard[i][j] === 1 || myBoard[i][j] === 2) {
+          setSelected([i, j]);
+        }
+      } else {
+        const [si, sj] = selected;
+        const [ti, tj] = [i, j];
+        if (Math.abs(si - ti) + Math.abs(sj - tj) === 1) {
+          setMyBoard((board) => {
+            const newMyBoard = board.map((row, i) => (
+              row.map((cell, j) => (
+                i === si && j === sj ? 0 :
+                  i === ti && j === tj ? myBoard[si][sj] :
+                    cell
+              ))
+            ));
+            return newMyBoard;
+          });
+          setOpBoard((board) => {
+            const newOpBoard = board.map((row, i) => (
+              row.map((cell, j) => (
+                5 - i === ti && 5 - j === tj ? 0 : cell
+              ))
+            ));
+            return newOpBoard;
+          });
+          setMyTurn(false);
+          socket.emit("move", { si, sj, ti, tj });
+        }
+        setSelected([]);
+      }
+    }
+  };
+
+  const moveGhost = ({ si, sj, ti, tj }) => {
+    setMyBoard((board) => {
+      const newMyBoard = board.map((row, i) => (
+        row.map((cell, j) => (
+          5 - i === ti && 5 - j === tj ? 0 : cell
+        ))
+      ));
+      return newMyBoard;
+    });
+    setOpBoard((board) => {
+      const newOpBoard = board.map((row, i) => (
+        row.map((cell, j) => (
+          i === si && j === sj ? 0 :
+            i === ti && j === tj ? myBoard[si][sj] :
+              cell
+        ))
+      ));
+      return newOpBoard;
+    });
+    setMyTurn(true);
   };
 
   const ViewBoard = () => {
     return (
       <div>
+        {state === "playing" && (
+          myTurn ? "あなたのターン" : "あいてのターン"
+        )}
         <div className="board">
           {
             myBoard.map((row, i) => (
@@ -112,7 +174,7 @@ function App() {
           <div>Waiting...</div>
         )}
         {state === "playing" && (
-          <div>ここにプレイ画面</div>
+          <ViewBoard />
         )}
       </header>
     </div>
