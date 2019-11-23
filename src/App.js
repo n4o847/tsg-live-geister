@@ -22,16 +22,14 @@ function App() {
 
   const startSetting = () => {
     setState("setting");
-    setMyBoard(board => {
-      board[4] = [0, 1, 1, 1, 1, 0];
-      board[5] = [0, 2, 2, 2, 2, 0];
-      return board;
-    });
-    setOpBoard(board => {
-      board[4] = [0, 1, 1, 1, 1, 0];
-      board[5] = [0, 2, 2, 2, 2, 0];
-      return board;
-    });
+    const myBoard = range(6).map((i) => range(6).map((j) => 0));
+    myBoard[4] = [0, 1, 1, 1, 1, 0];
+    myBoard[5] = [0, 2, 2, 2, 2, 0];
+    setMyBoard(myBoard);
+    const opBoard = range(6).map((i) => range(6).map((j) => 0));
+    opBoard[4] = [0, 1, 1, 1, 1, 0];
+    opBoard[5] = [0, 2, 2, 2, 2, 0];
+    setOpBoard(opBoard);
   };
 
   const startWaiting = () => {
@@ -43,6 +41,7 @@ function App() {
     setState("playing");
     setOpBoard(board);
     setMyTurn(turn);
+    setSelected([]);
   };
 
   const ViewHome = () => {
@@ -162,16 +161,16 @@ function App() {
         )}
         {state === "playing" && (
           <>
-            <p>あなた: 善 {
+            <div>あなた: 善 {
               flatten(myBoard).filter((g) => g === 1).length
             } 悪 {
-              flatten(myBoard).filter((g) => g === 2).length
-            }</p>
-            <p>あいて: 善 {
+                flatten(myBoard).filter((g) => g === 2).length
+              }</div>
+            <div>あいて: 善 {
               flatten(opBoard).filter((g) => g === 1).length
             } 悪 {
-              flatten(opBoard).filter((g) => g === 2).length
-            }</p>
+                flatten(opBoard).filter((g) => g === 2).length
+              }</div>
           </>
         )}
         <div className="board">
