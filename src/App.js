@@ -160,6 +160,20 @@ function App() {
         {state === "playing" && (
           myTurn ? "あなたのターン" : "あいてのターン"
         )}
+        {state === "playing" && (
+          <>
+            <p>あなた: 善 {
+              flatten(myBoard).filter((g) => g === 1).length
+            } 悪 {
+              flatten(myBoard).filter((g) => g === 2).length
+            }</p>
+            <p>あいて: 善 {
+              flatten(opBoard).filter((g) => g === 1).length
+            } 悪 {
+              flatten(opBoard).filter((g) => g === 2).length
+            }</p>
+          </>
+        )}
         <div className="board">
           {
             myBoard.map((row, i) => (
