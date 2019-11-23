@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import io from 'socket.io-client';
-import { range } from 'lodash';
+import { range, flatten } from 'lodash';
 
 let socket = null;
 
@@ -11,6 +11,7 @@ function App() {
   const [opBoard, setOpBoard] = useState(() => range(6).map((i) => range(6).map((j) => 0)));
   const [selected, setSelected] = useState([]);
   const [myTurn, setMyTurn] = useState(false);
+  const [win, setWin] = useState(false);
 
   useEffect(() => {
     socket = io();
@@ -80,12 +81,12 @@ function App() {
       } else {
         const [si, sj] = selected;
         const [ti, tj] = [i, j];
-        if (Math.abs(si - ti) + Math.abs(sj - tj) === 1) {
+        if (Math.abs(si - ti) + Math.abs(sj - tj) === 1 && myBoard[ti][tj] === 0) {
           setMyBoard((board) => {
             const newMyBoard = board.map((row, i) => (
               row.map((cell, j) => (
                 i === si && j === sj ? 0 :
-                  i === ti && j === tj ? myBoard[si][sj] :
+                  i === ti && j === tj ? board[si][sj] :
                     cell
               ))
             ));
@@ -97,6 +98,18 @@ function App() {
                 5 - i === ti && 5 - j === tj ? 0 : cell
               ))
             ));
+            if (!flatten(newOpBoard).includes(1)) {
+              setWin(true);
+              setState("gameset");
+            }
+            if (!flatten(newOpBoard).includes(2)) {
+              setWin(false);
+              setState("gameset");
+            }
+            if (newOpBoard[0][0] === 1 || newOpBoard[0][5] === 1) {
+              setWin(false);
+              setState("gameset");
+            }
             return newOpBoard;
           });
           setMyTurn(false);
@@ -114,13 +127,25 @@ function App() {
           5 - i === ti && 5 - j === tj ? 0 : cell
         ))
       ));
+      if (!flatten(newMyBoard).includes(1)) {
+        setWin(false);
+        setState("gameset");
+      }
+      if (!flatten(newMyBoard).includes(2)) {
+        setWin(true);
+        setState("gameset");
+      }
+      if (newMyBoard[0][0] === 1 || newMyBoard[0][5] === 1) {
+        setWin(true);
+        setState("gameset");
+      }
       return newMyBoard;
     });
     setOpBoard((board) => {
       const newOpBoard = board.map((row, i) => (
         row.map((cell, j) => (
           i === si && j === sj ? 0 :
-            i === ti && j === tj ? myBoard[si][sj] :
+            i === ti && j === tj ? board[si][sj] :
               cell
         ))
       ));
@@ -171,10 +196,18 @@ function App() {
           <ViewBoard />
         )}
         {state === "waiting" && (
-          <div>Waiting...</div>
+          <div>
+            <p>Waiting...</p>
+          </div>
         )}
         {state === "playing" && (
           <ViewBoard />
+        )}
+        {state === "gameset" && (
+          <div>
+            <p>{win ? "あなたのかち！" : "あいてのかち！"}</p>
+            <button onClick={() => setState("home")}>ホームにもどる</button>
+          </div>
         )}
       </header>
     </div>
